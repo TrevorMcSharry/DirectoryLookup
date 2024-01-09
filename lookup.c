@@ -1,5 +1,6 @@
 // Trevor McSharry
-// Final Exam
+// lookup.c
+// A program that parses a directory and looks for readable .txt files and searches for the keyword
 // 12/13/2023
 
 #include <stdio.h>
@@ -7,57 +8,11 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <stdint.h>
-
-#define COMMAND_DIE 0
-#define COMMAND_WORK 1
-#define COMMAND_IDLE 2
-
-struct Work {
-    char *keyword;
-    char *filename;
-    FILE *file;
-    struct Work *next;
-};
-
-struct WorkQueue {
-    struct Work *front;
-    struct Work *back;
-    int queue_size;
-};
-
-struct Thread {
-    struct WorkQueue *queue;
-    pthread_t tid;
-    pthread_mutex_t lock;
-    char *filename;
-    uint64_t result;
-    pthread_cond_t cond;
-    int status;
-};
-
-void add_work(struct Thread* thread, struct Work* work){
-    struct WorkQueue *queue = thread->queue;
-
-    pthread_mutex_lock(&thread->lock);
-
-    if(queue->back == NULL){
-        thread->queue->front = work;
-        thread->queue->back = work;
-    } else {
-        queue->back->next = work;
-        queue->back = work;
-    }
-
-    pthread_cond_signal(&thread->cond);
-
-    pthread_mutex_unlock(&thread->lock);
-}
 
 int main(int argc, char *argv[]){
 
